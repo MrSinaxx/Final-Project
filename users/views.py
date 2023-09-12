@@ -54,3 +54,11 @@ class UserAPIView(APIView):
             return Response(UserSerializer(user).data)
 
         raise AuthenticationFailed("unauthenticated")
+
+
+class RefreshAPIView(APIView):
+    def post(self, request):
+        refresh_token = request.COOKIES.get("refreshToken")
+        id = decode_refresh_token(refresh_token)
+        access_token = create_access_token(id)
+        return Response({"token": access_token})
