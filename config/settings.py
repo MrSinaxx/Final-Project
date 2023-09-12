@@ -128,6 +128,7 @@ STATIC_URL = "static/"
 
 STATIC_URL = "/static/"
 
+AUTH_USER_MODEL = "users.User"
 
 CORS_ORIGIN_ALLOW_ALL = True
 CORS_ALLOW_CREDENTIALS = True
