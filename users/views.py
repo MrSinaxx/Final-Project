@@ -1,6 +1,7 @@
+from rest_framework.authentication import get_authorization_header
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework.exceptions import APIException
+from rest_framework.exceptions import APIException, AuthenticationFailed
 from .authentication import (
     create_access_token,
     create_refresh_token,
@@ -38,3 +39,18 @@ class LoginAPIView(APIView):
         response.data = {"token": access_token}
 
         return response
+
+
+class UserAPIView(APIView):
+    def get(self, request):
+        auth = get_authorization_header(request).split()
+
+        if auth and len(auth) == 2:
+            token = auth[1].decode("utf-8")
+            id = decode_access_token(token)
+
+            user = User.objects.filter(pk=id).first()
+
+            return Response(UserSerializer(user).data)
+
+        raise AuthenticationFailed("unauthenticated")
