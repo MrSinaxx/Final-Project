@@ -38,3 +38,10 @@ class PodcastEpisodeSerializer(serializers.ModelSerializer):
         ]
 
 
+class PodcastLinkSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = PodcastLink
+        fields = [
+            "title",
+            "url",
+        ]
