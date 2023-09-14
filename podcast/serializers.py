@@ -20,3 +20,21 @@ class PodcastSerializer(serializers.ModelSerializer):
             "contentType",
             "genres",
         ]
+
+
+class PodcastEpisodeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = PodcastEpisode
+        fields = [
+            "podcast",
+            "title",
+            "duration",
+            "audioUrl",
+            "publish_date",
+            "explicit",
+            "imageUrl",
+            "summary",
+            "description",
+        ]
+
+
