@@ -143,7 +143,7 @@ def save_podcast_data_to_db(data):
         podcast.copyright = podcast_metadata["copyright"]
         podcast.language = podcast_metadata["language"]
         podcast.contentType = podcast_metadata["contentType"]
-        podcast.genres = ", ".join(podcast_metadata["genres"])
+        podcast.genres = podcast_metadata["genres"]
 
         podcast.save()
 
