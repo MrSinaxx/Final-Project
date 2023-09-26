@@ -109,9 +109,9 @@ def parse_rss_feed(rss_url):
             namespaces={"itunes": "http://www.itunes.com/dtds/podcast-1.0.dtd"},
         )
         podcast_metadata["genres"] = [
-            category.text
+            category.get("text")
             for category in root.findall(
-                "channel/itunes:category/itunes:category",
+                ".//itunes:category",
                 namespaces={"itunes": "http://www.itunes.com/dtds/podcast-1.0.dtd"},
             )
         ]
