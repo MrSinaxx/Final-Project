@@ -39,8 +39,10 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "rest_framework",
     "corsheaders",
-    "users",
     "podcast",
+    "accounts",
+    "rest_framework.authtoken",
+    "django_extensions",
 ]
 
 MIDDLEWARE = [
@@ -140,7 +142,28 @@ STATIC_URL = "static/"
 
 STATIC_URL = "/static/"
 
-AUTH_USER_MODEL = "users.User"
+AUTH_USER_MODEL = "accounts.CustomUser"
 
 CORS_ORIGIN_ALLOW_ALL = True
 CORS_ALLOW_CREDENTIALS = True
+
+
+REST_FRAMEWORK = {
+    "EXCEPTION_HANDLER": "accounts.exceptions.custom_exception_handler",
+    "NON_FIELD_ERRORS_KEY": "error",
+    "DEFAULT_AUTHENTICATION_CLASSES": ("accounts.authentication.JWTAuthentication",),
+}
+
+
+# Redis
+
+
+CACHES = {
+    "default": {
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": "redis://127.0.0.1:6379/0",
+        "OPTIONS": {
+            "CLIENT_CLASS": "django_redis.client.DefaultClient",
+        },
+    }
+}
