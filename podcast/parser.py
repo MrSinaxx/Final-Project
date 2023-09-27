@@ -1,16 +1,24 @@
 import xml.etree.ElementTree as ET
-import json
 import requests
 from django.db import transaction
 from .models import Podcast, PodcastEpisode
 
 
-def parse_rss_feed(rss_url):
-    try:
-        response = requests.get(rss_url)
-        response.raise_for_status()
-        xml_data = response.text
+class PodcastParser:
+    def __init__(self, rss_url):
+        self.rss_url = rss_url
 
+    def parse(self):
+        try:
+            response = requests.get(self.rss_url)
+            response.raise_for_status()
+            xml_data = response.text
+            return self.parse_xml(xml_data)
+        except requests.exceptions.RequestException as e:
+            print(f"Error fetching RSS feed: {e}")
+            return None
+
+    def parse_xml(self, xml_data):
         podcast_metadata = {
             "title": "",
             "summary": "",
@@ -118,35 +126,38 @@ def parse_rss_feed(rss_url):
 
         return {"podcast_metadata": podcast_metadata, "episodes": episodes}
 
-    except requests.exceptions.RequestException as e:
-        print(f"Error fetching RSS feed: {e}")
-        return None
 
+class PodcastDataSaver:
+    def __init__(self, data):
+        self.data = data
 
-def save_podcast_data_to_db(data):
-    podcast_metadata = data.get("podcast_metadata")
-    episodes = data.get("episodes")
+    def save(self):
+        podcast_metadata = self.data.get("podcast_metadata")
+        episodes = self.data.get("episodes")
 
-    with transaction.atomic():
-        podcast, created = Podcast.objects.get_or_create(
-            title=podcast_metadata["title"]
-        )
+        with transaction.atomic():
+            podcast, created = Podcast.objects.get_or_create(
+                title=podcast_metadata["title"]
+            )
+            self.update_podcast_metadata(podcast, podcast_metadata)
+            self.save_episodes(podcast, episodes)
 
-        podcast.summary = podcast_metadata["summary"]
-        podcast.subtitle = podcast_metadata["subtitle"]
-        podcast.authorName = podcast_metadata["authorName"]
-        podcast.imageUrl = podcast_metadata["imageUrl"]
-        podcast.rssOwnerName = podcast_metadata["rssOwnerName"]
-        podcast.rssOwnerPublicEmail = podcast_metadata["rssOwnerPublicEmail"]
-        podcast.websiteUrl = podcast_metadata["websiteUrl"]
-        podcast.isExplicitContent = podcast_metadata["isExplicitContent"]
-        podcast.copyright = podcast_metadata["copyright"]
-        podcast.language = podcast_metadata["language"]
-        podcast.contentType = podcast_metadata["contentType"]
-        podcast.genres = podcast_metadata["genres"]
-
+    def update_podcast_metadata(self, podcast, metadata):
+        podcast.summary = metadata["summary"]
+        podcast.subtitle = metadata["subtitle"]
+        podcast.authorName = metadata["authorName"]
+        podcast.imageUrl = metadata["imageUrl"]
+        podcast.rssOwnerName = metadata["rssOwnerName"]
+        podcast.rssOwnerPublicEmail = metadata["rssOwnerPublicEmail"]
+        podcast.websiteUrl = metadata["websiteUrl"]
+        podcast.isExplicitContent = metadata["isExplicitContent"]
+        podcast.copyright = metadata["copyright"]
+        podcast.language = metadata["language"]
+        podcast.contentType = metadata["contentType"]
+        podcast.genres = metadata["genres"]
         podcast.save()
 
+    def save_episodes(self, podcast, episodes):
         for episode_data in episodes:
             if not PodcastEpisode.objects.filter(
                 podcast=podcast, audioUrl=episode_data["audioUrl"]
@@ -163,3 +174,11 @@ def save_podcast_data_to_db(data):
                     description=episode_data["description"],
                 )
                 episode.save()
+
+
+def main(rss_url):
+    parser = PodcastParser(rss_url)
+    data = parser.parse()
+    if data:
+        saver = PodcastDataSaver(data)
+        saver.save()

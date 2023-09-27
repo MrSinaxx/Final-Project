@@ -1,5 +1,5 @@
 from django.core.management.base import BaseCommand
-from podcast.parser import parse_rss_feed, save_podcast_data_to_db
+from podcast.parser import PodcastParser, PodcastDataSaver
 from podcast.models import PodcastLink
 
 
@@ -11,12 +11,14 @@ class Command(BaseCommand):
 
         for link in podcast_links:
             rss_feed_url = link.url
-            podcast_data = parse_rss_feed(rss_feed_url)
+            parser = PodcastParser(rss_feed_url)
+            podcast_data = parser.parse()
 
             if podcast_data:
                 podcast_title = link.title
 
-                save_podcast_data_to_db(podcast_data)
+                saver = PodcastDataSaver(podcast_data)
+                saver.save()
 
                 self.stdout.write(
                     self.style.SUCCESS(
