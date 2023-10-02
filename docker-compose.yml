@@ -1,0 +1,56 @@
+
+
+services:
+  app:
+    build: .
+    command: sh -c "python3 manage.py makemigrations accounts interactions podcast && python3 manage.py migrate && python3 manage.py runserver 0.0.0.0:8000"
+    volumes:
+      - app:/app
+    networks:
+      - main
+    ports:
+      - 8000:8000
+    depends_on:
+      - postgres
+    
+
+
+  postgres:
+    image: postgres:14
+    volumes:
+      - postgres-data:/var/lib/postgresql
+    environment:
+      - POSTGRES_DB=${DB_NAME}
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+    networks:
+      - main
+    restart: always
+    env_file:
+      - .env
+
+
+
+  redis:
+    image: redis:7
+    networks:
+      - main
+    volumes:
+      - redis:/redis
+    
+
+
+
+
+
+
+
+
+networks:
+  main:
+
+volumes:
+  app:
+  postgres-data:
+  redis:
+
