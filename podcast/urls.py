@@ -15,6 +15,8 @@ urlpatterns = [
         name="podcast-episodes-list-create",
     ),
     path(
-        "episodes/<int:pk>/", PodcastEpisodeDetailView.as_view(), name="episode-detail"
+        "episodes/<int:pk>/",
+        PodcastEpisodeDetailView.as_view(),
+        name="podcast-episode-detail",
     ),
 ]

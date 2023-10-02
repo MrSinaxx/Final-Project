@@ -3,6 +3,7 @@ from rest_framework import generics
 from .models import Podcast, PodcastEpisode
 from rest_framework.pagination import PageNumberPagination
 from .serializers import PodcastSerializer, PodcastEpisodeSerializer
+from interactions.models import Viewed
 
 
 class PodcastListCreateView(generics.ListCreateAPIView):
@@ -58,5 +59,13 @@ class PodcastEpisodeDetailView(generics.RetrieveUpdateDestroyAPIView):
 
         if not queryset.exists():
             raise Http404("Podcast episode not found")
+
+        # Get the current user
+        user = self.request.user
+
+        # Record the view in the "Viewed" model
+        if user.is_authenticated:
+            episode = queryset.first()
+            Viewed.objects.get_or_create(user=user, podcast_episode=episode)
 
         return queryset.first()

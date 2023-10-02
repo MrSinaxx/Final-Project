@@ -26,7 +26,7 @@ def access_token_gen(user_id: int):
         {
             "token_type": "access",
             "user_id": user_id,
-            "exp": datetime.utcnow() + timedelta(minutes=1),
+            "exp": datetime.utcnow() + timedelta(minutes=10),
             "iat": datetime.utcnow(),
             "jti": gen_jti(),
         }
