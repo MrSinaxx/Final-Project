@@ -1,14 +1,16 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny, IsAuthenticated
-from rest_framework.generics import RetrieveUpdateAPIView
+from rest_framework.generics import RetrieveUpdateAPIView, UpdateAPIView
 from rest_framework import status
-from django.contrib.auth import update_session_auth_hash
+
+
 from .serializers import *
 from .renderers import UserJSONRenderer
 
 
 # Create your views here.
+
 
 
 class RegistrationAPIView(APIView):
@@ -17,13 +19,14 @@ class RegistrationAPIView(APIView):
     serializer_class = RegisterationSerializer
 
     def post(self, request):
-        user = request.data.get("user", {})
+        user = request.data.get('user', {})
 
         serializer = self.serializer_class(data=user)
         serializer.is_valid(raise_exception=True)
         serializer.save()
 
         return Response(serializer.data, status=status.HTTP_201_CREATED)
+    
 
 
 class LoginAPIView(APIView):
@@ -32,12 +35,15 @@ class LoginAPIView(APIView):
     serializer_class = LoginSerializer
 
     def post(self, request):
-        user = request.data.get("user", {})
-
+        
+        user = request.data.get('user', {})
+        
         serializer = self.serializer_class(data=user)
         serializer.is_valid(raise_exception=True)
-
+        
         return Response(serializer.data, status=status.HTTP_200_OK)
+    
+
 
 
 class UserRetrieveUpdateAPIView(RetrieveUpdateAPIView):
@@ -46,12 +52,15 @@ class UserRetrieveUpdateAPIView(RetrieveUpdateAPIView):
     serializer_class = UserRUSerializer
 
     def retrieve(self, request, *args, **kwargs):
+
         serializer = self.serializer_class(request.user)
 
         return Response(serializer.data, status=status.HTTP_200_OK)
+    
 
     def update(self, request, *args, **kwargs):
-        serializer_data = request.data.get("user", {})
+        
+        serializer_data = request.data.get('user', {})
 
         serializer = self.serializer_class(
             request.user, data=serializer_data, partial=True
@@ -61,6 +70,7 @@ class UserRetrieveUpdateAPIView(RetrieveUpdateAPIView):
         serializer.save()
 
         return Response(serializer.data, status=status.HTTP_200_OK)
+    
 
 
 class RefreshTokenAPIView(APIView):
@@ -69,12 +79,14 @@ class RefreshTokenAPIView(APIView):
     serializer_class = RefreshTokenSerializer
 
     def post(self, request):
-        user_data = request.data.get("user", {})
 
+        user_data = request.data.get('user', {})
+        
         serializer = self.serializer_class(data=user_data)
         serializer.is_valid(raise_exception=True)
 
         return Response(serializer.data, status=status.HTTP_200_OK)
+    
 
 
 class AccessTokenAPIView(APIView):
@@ -83,7 +95,8 @@ class AccessTokenAPIView(APIView):
     serializer_class = AccessTokenSerializer
 
     def post(self, request):
-        token = request.data.get("user", {})
+
+        token = request.data.get('user', {})
 
         serializer = self.serializer_class(data=token)
         serializer.is_valid(raise_exception=True)
@@ -91,50 +104,38 @@ class AccessTokenAPIView(APIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
+
+
 class LogOutAPIView(APIView):
     # only if refresh token exists the user will be kept logged in
-    permission_classes = (AllowAny,)
-    renderer_classes = (UserJSONRenderer,)
-    serializer_class = LogoutSerializer
+    permission_classes = (IsAuthenticated,)
 
     def post(self, request):
-        user = request.data.get("user", {})
 
-        serializer = self.serializer_class(data=user)
-        serializer.is_valid(raise_exception=True)
+        user = request.user
+        token_deleter(user.id)
+        msg = {'status':'logged out!'}
 
-        return Response(serializer.data, status=status.HTTP_200_OK)
-
-
-from .serializers import ChangePasswordSerializer
+        return Response(msg, status=status.HTTP_200_OK)
+    
 
 
-class ChangePasswordAPIView(APIView):
+
+class ChangePasswordView(UpdateAPIView):
     permission_classes = (IsAuthenticated,)
+    renderer_classes = (UserJSONRenderer,)
     serializer_class = ChangePasswordSerializer
 
-    def put(self, request):
-        serializer = self.serializer_class(data=request.data)
+    def update(self, request, *args, **kwargs):
+        
+        serializer_data = request.data.get('user', {})
 
-        if serializer.is_valid():
-            old_password = serializer.validated_data.get("old_password")
-            new_password = serializer.validated_data.get("new_password")
-            user = request.user
+        serializer = self.serializer_class(
+            request.user, data=serializer_data, partial=True
+        )
 
-            # Check if the old password is correct
-            if not user.check_password(old_password):
-                return Response(
-                    {"detail": "Old password is incorrect."},
-                    status=status.HTTP_400_BAD_REQUEST,
-                )
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
 
-            # Set the new password and update the session auth hash
-            user.set_password(new_password)
-            user.save()
-            update_session_auth_hash(request, user)
-
-            return Response(
-                {"detail": "Password successfully changed."}, status=status.HTTP_200_OK
-            )
-        else:
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        msg = {'status': 'Password changed succesfully.'}
+        return Response(msg, status=status.HTTP_200_OK)

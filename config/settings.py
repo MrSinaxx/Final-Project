@@ -11,6 +11,9 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 """
 
 from pathlib import Path
+import os
+import sys
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -25,7 +28,11 @@ SECRET_KEY = "django-insecure-_a*!j+b+q1u-^z4e0c5#7n00d))9$&7&h&z4h=6yy2fjz%%qfi
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [
+    "localhost",
+    "127.0.0.1",
+    "0.0.0.0",
+]
 
 
 # Application definition
@@ -41,8 +48,10 @@ INSTALLED_APPS = [
     "corsheaders",
     "podcast",
     "accounts",
+    "interactions",
     "rest_framework.authtoken",
     "django_extensions",
+    "django_filters",
 ]
 
 MIDDLEWARE = [
@@ -76,6 +85,9 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "config.wsgi.application"
 
+INTERNAL_IPS = [
+    "127.0.0.1",
+]
 
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
@@ -151,6 +163,7 @@ CORS_ALLOW_CREDENTIALS = True
 REST_FRAMEWORK = {
     "EXCEPTION_HANDLER": "accounts.exceptions.custom_exception_handler",
     "NON_FIELD_ERRORS_KEY": "error",
+    "DEFAULT_FILTER_BACKENDS": ["django_filters.rest_framework.DjangoFilterBackend"],
     "DEFAULT_AUTHENTICATION_CLASSES": ("accounts.authentication.JWTAuthentication",),
 }
 
@@ -161,9 +174,11 @@ REST_FRAMEWORK = {
 CACHES = {
     "default": {
         "BACKEND": "django_redis.cache.RedisCache",
-        "LOCATION": "redis://127.0.0.1:6379/0",
+        "LOCATION": "redis://localhost:6379/0",
         "OPTIONS": {
             "CLIENT_CLASS": "django_redis.client.DefaultClient",
         },
     }
 }
+
+BASE_URL = "http://127.0.0.1:8000"

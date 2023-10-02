@@ -1,10 +1,12 @@
 from django.db import models
 from django.contrib.auth.models import User
 from podcast.models import PodcastEpisode
+from django.conf import settings
+from accounts.models import CustomUser
 
 
 class Like(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
     podcast_episode = models.ForeignKey(PodcastEpisode, on_delete=models.CASCADE)
 
     def __str__(self):
@@ -12,7 +14,7 @@ class Like(models.Model):
 
 
 class Comment(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
     podcast_episode = models.ForeignKey(PodcastEpisode, on_delete=models.CASCADE)
     content = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
@@ -22,7 +24,7 @@ class Comment(models.Model):
 
 
 class SavedPodcast(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
     podcast_episode = models.ForeignKey(PodcastEpisode, on_delete=models.CASCADE)
 
     def __str__(self):
@@ -30,7 +32,7 @@ class SavedPodcast(models.Model):
 
 
 class Viewed(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
     podcast_episode = models.ForeignKey(PodcastEpisode, on_delete=models.CASCADE)
     viewed_at = models.DateTimeField(auto_now_add=True)
 

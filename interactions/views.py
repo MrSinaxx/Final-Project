@@ -142,8 +142,6 @@ class RecommendationsAPIView(APIView):
 
     def get(self, request):
         user = request.user
-        recommendations = get_content_recommendations(user)[
-            :10
-        ]  # Get the top 10 recommendations
+        recommendations = get_content_recommendations(user)[:10]
         serializer = self.serializer_class(recommendations, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
