@@ -66,14 +66,19 @@ class SavePodcastEpisodeAPIView(APIView):
 
     def post(self, request, episode_id):
         episode = PodcastEpisode.objects.get(id=episode_id)
-        serializer = SavedPodcastSerializer(data={"podcast_episode": episode.id})
+        saved_podcast, created = SavedPodcast.objects.get_or_create(
+            user=request.user, podcast_episode=episode
+        )
 
-        if serializer.is_valid():
-            serializer.save(user=request.user)
+        if created:
+            serializer = SavedPodcastSerializer(saved_podcast)
             return Response(
                 {"message": "Podcast episode saved"}, status=status.HTTP_201_CREATED
             )
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            return Response(
+                {"message": "Podcast episode already saved"}, status=status.HTTP_200_OK
+            )
 
 
 class UnsavePodcastEpisodeAPIView(APIView):

@@ -97,11 +97,11 @@ from decouple import config
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql_psycopg2",
-        "NAME": config("DB_NAME"),
-        "USER": config("DB_USER"),
-        "PASSWORD": config("DB_PASSWORD"),
-        "HOST": config("DB_HOST"),
-        "PORT": config("DB_PORT", default="5432"),
+        "NAME": "rssdb",
+        "USER": "postgres",
+        "PASSWORD": "postgres",
+        "HOST": "postgres",
+        "PORT": "5432",
     }
 }
 
@@ -175,11 +175,25 @@ REST_FRAMEWORK = {
 CACHES = {
     "default": {
         "BACKEND": "django_redis.cache.RedisCache",
-        "LOCATION": "redis://localhost:6379/0",
+        "LOCATION": "redis://redis:6379/0",  # Use "redis" as the hostname
         "OPTIONS": {
             "CLIENT_CLASS": "django_redis.client.DefaultClient",
         },
     }
 }
 
+
 BASE_URL = "http://127.0.0.1:8000"
+
+
+# SMTP configuration for development using smtp4dev.
+EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+EMAIL_HOST = "smtp4dev"
+EMAIL_PORT = 25  # The port that smtp4dev is running on (change if needed).
+EMAIL_USE_TLS = False
+EMAIL_USE_SSL = False
+
+
+# Celery settings
+CELERY_BROKER_URL = "redis://redis:6379/0"  # Use "redis" as the hostname
+CELERY_RESULT_BACKEND = "redis://redis:6379/0"  # Use "redis" as the hostname

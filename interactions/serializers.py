@@ -11,7 +11,7 @@ class CommentSerializer(serializers.ModelSerializer):
 class SavedPodcastSerializer(serializers.ModelSerializer):
     class Meta:
         model = SavedPodcast
-        fields = "__all__"
+        exclude = ("user",)  # Exclude the 'user' field from serialization
 
 
 class LikeSerializer(serializers.ModelSerializer):

@@ -170,3 +170,11 @@ def recreate_refresh_token(user_id, exp, u_uid):
     )
 
     return refresh_token
+
+
+def delete_cache(key):
+    cache.delete(f"{key}")
+
+
+def decode_token(token):
+    return jwt.decode(token, settings.SECRET_KEY, algorithms=["HS256"])
