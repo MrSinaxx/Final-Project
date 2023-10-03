@@ -3,7 +3,7 @@
 services:
   app:
     build: .
-    command: sh -c "python3 manage.py makemigrations accounts interactions podcast && python3 manage.py migrate && python3 manage.py runserver 0.0.0.0:8000"
+    command: sh -c "python3 manage.py makemigrations accounts interactions podcast && python3 manage.py migrate && python3 manage.py runserver 0.0.0.0:8000 --noreload"
     volumes:
       - app:/app
     networks:
@@ -12,22 +12,40 @@ services:
       - 8000:8000
     depends_on:
       - postgres
-    
+      - smtp4dev
+
+
+
+
+  hotreload:
+    build: .
+    command: sh -c "watchmedo auto-restart --directory=/app --pattern=*.py --recursive python3 manage.py runserver 0.0.0.0:8000"
+    volumes:
+      - .:/app  
+    networks:
+      - main
+    depends_on:
+      - app
+
+
+
+
+
+
 
 
   postgres:
     image: postgres:14
     volumes:
-      - postgres-data:/var/lib/postgresql
+      - postgres-data:/var/lib/postgresql/data
     environment:
-      - POSTGRES_DB=${DB_NAME}
-      - POSTGRES_USER=${DB_USER}
-      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_DB=rssdb
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
     networks:
       - main
     restart: always
-    env_file:
-      - .env
+
 
 
 
@@ -38,9 +56,24 @@ services:
     volumes:
       - redis:/redis
     
+  smtp4dev:  
+    image: rnwood/smtp4dev:latest
+    ports:
+      - "3000:80"  
+    networks:
+      - main
 
-
-
+  celery:
+    restart: always
+    build: .
+    command: celery -A config worker --loglevel=info
+    networks:
+      - main
+    volumes:
+      - celery:/celery
+    depends_on:
+      - redis
+      - app
 
 
 
@@ -53,4 +86,4 @@ volumes:
   app:
   postgres-data:
   redis:
-
+  celery:
