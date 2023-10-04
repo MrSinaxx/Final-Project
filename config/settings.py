@@ -186,17 +186,16 @@ CACHES = {
 BASE_URL = "http://127.0.0.1:8000"
 
 
-# SMTP configuration for development using smtp4dev.
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
 EMAIL_HOST = "smtp4dev"
-EMAIL_PORT = 25  # The port that smtp4dev is running on (change if needed).
+EMAIL_PORT = 25
 EMAIL_USE_TLS = False
 EMAIL_USE_SSL = False
 
 
 # Celery settings
-CELERY_BROKER_URL = "redis://redis:6379/0"  # Use "redis" as the hostname
-CELERY_RESULT_BACKEND = "redis://redis:6379/0"  # Use "redis" as the hostname
+CELERY_BROKER_URL = "redis://redis:6379/0"
+CELERY_RESULT_BACKEND = "redis://redis:6379/0"
 
 
 LOGGING = {
