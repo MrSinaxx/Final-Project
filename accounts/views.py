@@ -92,38 +92,16 @@ class AccessTokenAPIView(APIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
-# class LogOutAPIView(APIView):
-#     # only if refresh token exists the user will be kept logged in
-#     permission_classes = (IsAuthenticated,)
-
-#     def post(self, request):
-#         user = request.user
-
-#         token_deleter(user.id)
-#         msg = {"status": "logged out!"}
-
-#         return Response(msg, status=status.HTTP_200_OK)
-
-
 class LogOutAPIView(APIView):
-    """
-    Removes the user from whitelist
-
-    args:
-        request => request that the user sent
-
-    return:
-        HTTPResponse => JSON(API)
-    """
+    # only if refresh token exists the user will be kept logged in
+    permission_classes = (IsAuthenticated,)
 
     def post(self, request):
-        access_token = request.data.get("access_token")
-        if not access_token:
-            return Response(status=status.HTTP_400_BAD_REQUEST)
+        user = request.user
+        token_deleter(user.id)
+        msg = {"status": "logged out!"}
 
-        jti = decode_token(access_token).get("jti")
-        delete_cache(jti)
-        return Response(status=status.HTTP_204_NO_CONTENT)
+        return Response(msg, status=status.HTTP_200_OK)
 
 
 class ChangePasswordView(UpdateAPIView):

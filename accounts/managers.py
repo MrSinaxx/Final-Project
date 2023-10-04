@@ -17,8 +17,8 @@ class CustomUserManager(BaseUserManager):
         if email is None:
             raise TypeError("User must have an email!")
 
-        # if password != kwargs.get("confirm_password"):
-        #     raise UnmatchedException("Passwords don't match")
+        if password != kwargs["confirm_password"]:
+            raise UnmatchedException("Passwords doesn't match")
 
         user = self.model(username=username, email=email)
         user.set_password(password)
@@ -30,14 +30,9 @@ class CustomUserManager(BaseUserManager):
         if password is None:
             raise TypeError("Please enter your password!")
 
-        user = self.create_user(username=username, email=email, password=password)
-        # user = self.create_user(
-        #     username=username,
-        #     email=email,
-        #     password=password,
-        #     confirm_password=confirm_password,
-        # )
-
+        user = self.create_user(
+            username=username, email=email, password=password, confirm_password=password
+        )
         user.is_staff = True
         user.is_superuser = True
         user.save()
