@@ -197,3 +197,30 @@ EMAIL_USE_SSL = False
 # Celery settings
 CELERY_BROKER_URL = "redis://redis:6379/0"  # Use "redis" as the hostname
 CELERY_RESULT_BACKEND = "redis://redis:6379/0"  # Use "redis" as the hostname
+
+
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "formatters": {
+        "verbose": {
+            "format": "%(levelname)s %(asctime)s %(module)s %(process)d %(thread)d %(message)s",
+            "style": "{",
+        },
+    },
+    "handlers": {
+        "file": {
+            "level": "INFO",
+            "class": "logging.handlers.TimedRotatingFileHandler",
+            "filename": "./debug.log",
+            "formatter": "verbose",
+        },
+    },
+    "loggers": {
+        "celery": {
+            "handlers": ["file"],
+            "level": "INFO",
+            "propagate": False,
+        },
+    },
+}
