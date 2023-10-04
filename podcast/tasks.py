@@ -1,6 +1,7 @@
 from celery import shared_task, Task
 from celery.utils.log import get_task_logger
 from podcast.parser import PodcastParser, PodcastDataSaver
+from requests.exceptions import RequestException
 from podcast.models import PodcastLink
 
 logger = get_task_logger(__name__)
@@ -30,6 +31,9 @@ def scrape_and_update_podcast(self, podcast_link_id):
             )
         else:
             logger.error(f"Error parsing the podcast data for {rss_feed_url}")
+    except RequestException as req_error:
+        logger.error(f"Connection error when fetching {rss_feed_url}: {str(req_error)}")
+        raise self.retry(exc=req_error)
 
     except PodcastLink.DoesNotExist:
         logger.error(f"PodcastLink with id {podcast_link_id} does not exist")
